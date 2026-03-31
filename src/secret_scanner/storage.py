@@ -13,7 +13,29 @@ class SecretStorage:
         secrets: List[Dict],
         output_path: str
     ) -> str:
-        """Save extracted secrets to file."""
+        """Save extracted secrets to file.
+
+        Args:
+            secrets: List of secret dictionaries with keys: file, line, rule_id, original
+            output_path: Path to write the secrets file
+
+        Returns:
+            The output path where secrets were written
+
+        Raises:
+            ValueError: If secrets list is empty or contains invalid entries
+        """
+        if not secrets:
+            raise ValueError("Secrets list cannot be empty")
+
+        required_keys = {"file", "line", "rule_id", "original"}
+        for i, secret in enumerate(secrets):
+            missing_keys = required_keys - set(secret.keys())
+            if missing_keys:
+                raise ValueError(
+                    f"Secret at index {i} is missing required keys: {missing_keys}"
+                )
+
         lines = [
             "# Secret Scanner - Extracted Secrets",
             f"# Generated: {self.generated_at}",

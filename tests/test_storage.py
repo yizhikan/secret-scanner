@@ -26,3 +26,19 @@ class TestSecretStorage:
 
         content = gitignore_path.read_text()
         assert ".env.secret" in content
+
+    def test_create_gitignore_entry_already_exists(self, tmp_path):
+        """Test that .env.secret is not duplicated if already in .gitignore."""
+        storage = SecretStorage()
+        gitignore_path = tmp_path / ".gitignore"
+
+        # Pre-populate .gitignore with .env.secret entry
+        gitignore_path.write_text("# Existing entries\nnode_modules/\n.env.secret\n*.log\n")
+
+        storage.ensure_gitignore_entry(str(gitignore_path))
+
+        content = gitignore_path.read_text()
+        # Should still contain .env.secret
+        assert ".env.secret" in content
+        # But should not be duplicated
+        assert content.count(".env.secret") == 1
