@@ -19,7 +19,8 @@ class ScanResult:
 class Scanner:
     def __init__(self, config: Optional[dict] = None):
         self.config = config or {}
-        self.detector = Detector()
+        # Pass config to Detector for custom rules if provided
+        self.detector = Detector(rules=self.config.get("rules"))
         self.redactor = Redactor()
         self.reporter = Reporter()
         self.storage = SecretStorage()
@@ -39,25 +40,22 @@ class Scanner:
         result.secrets_extracted = len(result.findings)
 
         if redact and output_dir:
-            # Redact files
+            # Redact files and collect secrets
             files_redacted = set()
+            all_secrets = []
             for finding in result.findings:
                 if finding.file_path not in files_redacted:
-                    self.redactor.redact_file(finding.file_path)
+                    secrets = self.redactor.redact_file(finding.file_path)
                     files_redacted.add(finding.file_path)
+                    all_secrets.extend(secrets)
 
-            # Save secrets
-            secret_path = Path(output_dir) / ".env.secret"
-            all_secrets = []
-            for f in files_redacted:
-                _, secrets = self.redactor.redact_content(
-                    Path(f).read_text(), f
+            # Save secrets if any were found
+            if all_secrets:
+                secret_path = Path(output_dir) / ".env.secret"
+                self.storage.save_secrets(all_secrets, str(secret_path))
+                self.storage.ensure_gitignore_entry(
+                    str(Path(output_dir) / ".gitignore")
                 )
-                all_secrets.extend(secrets)
-            self.storage.save_secrets(all_secrets, str(secret_path))
-            self.storage.ensure_gitignore_entry(
-                str(Path(output_dir) / ".gitignore")
-            )
 
         # Generate report
         if output_dir:
