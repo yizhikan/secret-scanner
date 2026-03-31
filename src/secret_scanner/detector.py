@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 from typing import List, Optional
 from pathlib import Path
+import os
 from .rules.engine import RulesEngine
 
 
@@ -90,7 +91,8 @@ class Detector:
         ]
         exclude.extend(default_excludes)
 
-        for root, dirs, files in Path(dir_path).walk():
+        for root, dirs, files in os.walk(dir_path):
+            root_path = Path(root)
             # Filter directories
             dirs[:] = [
                 d for d in dirs
@@ -100,7 +102,7 @@ class Detector:
             for file in files:
                 if any(self._matches_pattern(file, p) for p in exclude):
                     continue
-                file_path = str(root / file)
+                file_path = str(root_path / file)
                 findings.extend(self.scan_file(file_path))
 
         return findings
