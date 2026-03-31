@@ -18,6 +18,8 @@ class RulesEngine:
 
     def load_custom_rules(self, path: str) -> List[Dict[str, Any]]:
         """Load user-defined rules from YAML file."""
+        if not Path(path).exists():
+            raise FileNotFoundError(f"Rules file not found: {path}")
         with open(path, "r") as f:
             data = yaml.safe_load(f)
         return data.get("rules", [])
@@ -35,6 +37,10 @@ class RulesEngine:
     def compile_rules(self, rules: List[Dict[str, Any]]) -> None:
         """Compile regex patterns for efficient matching."""
         for rule in rules:
+            if "id" not in rule:
+                raise ValueError("Rule dict must contain 'id' key")
+            if "pattern" not in rule:
+                raise ValueError(f"Rule dict must contain 'pattern' key (rule id: {rule['id']})")
             try:
                 self._compiled_patterns[rule["id"]] = re.compile(rule["pattern"])
             except re.error as e:
