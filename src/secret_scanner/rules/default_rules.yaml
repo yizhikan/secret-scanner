@@ -1,0 +1,61 @@
+# default_rules.yaml
+rules:
+  - id: aws_access_key
+    pattern: "AKIA[0-9A-Z]{16}"
+    description: "AWS Access Key ID"
+    severity: high
+
+  - id: aws_secret_key
+    pattern: "(?i)aws[_-]?secret[_-]?access[_-]?key\\s*[=:]\\s*[\"']?[A-Za-z0-9/+=]{40}"
+    description: "AWS Secret Access Key"
+    severity: high
+
+  - id: github_token
+    pattern: "gh[pousr]_[A-Za-z0-9_]{36,}"
+    description: "GitHub Token"
+    severity: high
+
+  - id: gitlab_token
+    pattern: "glpat-[A-Za-z0-9_-]{20,}"
+    description: "GitLab Token"
+    severity: high
+
+  - id: openai_api_key
+    pattern: "sk-[A-Za-z0-9]{48}"
+    description: "OpenAI API Key"
+    severity: high
+
+  - id: anthropic_api_key
+    pattern: "sk-ant-[A-Za-z0-9_-]{90,}"
+    description: "Anthropic API Key"
+    severity: high
+
+  - id: google_api_key
+    pattern: "AIza[0-9A-Za-z_-]{35}"
+    description: "Google API Key"
+    severity: high
+
+  - id: private_key
+    pattern: "-----BEGIN (RSA |DSA |EC |OPENSSH )?PRIVATE KEY-----"
+    description: "Private Key"
+    severity: high
+
+  - id: database_url
+    pattern: "(?i)(mysql|postgres|postgresql|mongodb|redis)://[^\\s:]+:[^\\s@]+@"
+    description: "Database Connection String"
+    severity: high
+
+  - id: generic_password
+    pattern: "(?i)(password|passwd|pwd|secret)\\s*[=:]\\s*[\"'][^\"']{8,}[\"']"
+    description: "Generic Password"
+    severity: medium
+
+  - id: generic_api_key
+    pattern: "(?i)api[_-]?key\\s*[=:]\\s*[\"']?[A-Za-z0-9_-]{16,}[\"']?"
+    description: "Generic API Key"
+    severity: medium
+
+  - id: jwt_secret
+    pattern: "(?i)jwt[_-]?(secret|key)\\s*[=:]\\s*[\"'][^\"']{16,}[\"']"
+    description: "JWT Secret"
+    severity: medium
