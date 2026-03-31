@@ -5,11 +5,10 @@ from .detector import Finding
 
 
 class Reporter:
-    def __init__(self):
-        self.generated_at = datetime.now().isoformat()
-
     def generate_report(self, findings: List[Finding], output_path: str) -> str:
         """Generate Markdown report."""
+        generated_at = datetime.now().isoformat()
+
         # Group by severity
         by_severity = {"high": [], "medium": [], "low": []}
         for finding in findings:
@@ -22,7 +21,7 @@ class Reporter:
         lines = [
             "# Secret Scan Report",
             "",
-            f"**Generated:** {self.generated_at}",
+            f"**Generated:** {generated_at}",
             "",
             "## Summary",
             "",
