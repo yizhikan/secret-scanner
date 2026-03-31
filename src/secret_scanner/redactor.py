@@ -18,6 +18,8 @@ class Redactor:
         secrets = []
 
         # Sort by position (reverse order to maintain positions)
+        # Magic number 1000: ensures line number takes precedence over column
+        # (assumes max 1000 columns per line), so position = line * 1000 + column
         findings.sort(key=lambda f: f.line_number * 1000 + f.column, reverse=True)
 
         lines = content.split("\n")
@@ -61,7 +63,10 @@ class Redactor:
 
         redacted, secrets = self.redact_content(content, file_path)
 
-        with open(file_path, "w", encoding="utf-8") as f:
-            f.write(redacted)
+        try:
+            with open(file_path, "w", encoding="utf-8") as f:
+                f.write(redacted)
+        except IOError as e:
+            raise IOError(f"Failed to write redacted file {file_path}: {e}")
 
         return secrets
