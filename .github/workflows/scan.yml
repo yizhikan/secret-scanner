@@ -1,0 +1,40 @@
+name: Secret Scan
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install secret-scanner
+        run: |
+          pip install -e .
+
+      - name: Run secret scan
+        run: |
+          python -m secret_scanner scan \
+            --local . \
+            --output . \
+            --config .secret-scanner.yaml || true
+
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: secret-scan-report
+          path: |
+            secret_report.md
+            .env.secret
