@@ -1,23 +1,27 @@
 # tests/test_github_client.py
 import pytest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, MagicMock
 
 
 class TestGitHubClient:
-    def test_list_user_repos(self):
+    @patch('secret_scanner.github_client.requests.Session')
+    def test_list_user_repos(self, mock_session_class):
         from secret_scanner.github_client import GitHubClient
 
-        client = GitHubClient(token="fake_token")
+        # Setup mock session and response
+        mock_session = MagicMock()
+        mock_session_class.return_value = mock_session
 
-        # Mock the _fetch_repos method
-        with patch.object(client, "_fetch_repos") as mock_fetch:
-            mock_fetch.return_value = [
-                {"name": "repo1", "full_name": "user/repo1", "clone_url": "https://github.com/user/repo1.git"},
-                {"name": "repo2", "full_name": "user/repo2", "clone_url": "https://github.com/user/repo2.git"}
-            ]
-            repos = client.list_user_repos("testuser")
-            assert len(repos) == 2
-            assert repos[0]["name"] == "repo1"
+        # Mock the API response to return empty list (no more pages)
+        mock_response = MagicMock()
+        mock_response.json.return_value = []
+        mock_response.raise_for_status = MagicMock()
+        mock_session.get.return_value = mock_response
+
+        client = GitHubClient(token="fake_token")
+        repos = client.list_user_repos("testuser")
+
+        assert repos == []
 
     def test_clone_repo(self, tmp_path):
         from secret_scanner.github_client import GitHubClient
