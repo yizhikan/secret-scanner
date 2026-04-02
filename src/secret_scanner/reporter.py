@@ -1,5 +1,6 @@
 # src/secret_scanner/reporter.py
 from datetime import datetime
+from pathlib import Path
 from typing import List
 from .detector import Finding
 
@@ -60,6 +61,12 @@ class Reporter:
                 lines.extend(self._format_finding(finding))
 
         content = "\n".join(lines)
+
+        # Ensure output directory exists
+        output_dir = Path(output_path).parent
+        if output_dir and not output_dir.exists():
+            output_dir.mkdir(parents=True, exist_ok=True)
+
         with open(output_path, "w") as f:
             f.write(content)
 
